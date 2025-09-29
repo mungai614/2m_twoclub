@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Admin Dashboard</title>
+    <style>
+        /* Reset some default styles */
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f4f6f8;
+            margin: 0;
+            padding: 0;
+            color: #333;
+        }
+        header {
+            background-color: #007bff;
+            color: white;
+            padding: 20px 30px;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        main {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+        h1 {
+            margin-top: 0;
+            font-weight: 700;
+            font-size: 2.5rem;
+        }
+        p {
+            font-size: 1.2rem;
+            margin: 15px 0 30px 0;
+            line-height: 1.5;
+        }
+        a.button {
+            display: inline-block;
+            background-color: #28a745;
+            color: white;
+            text-decoration: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-weight: 600;
+            transition: background-color 0.3s ease;
+        }
+        a.button:hover {
+            background-color: #218838;
+        }
+        /* Optional: add a stats section */
+        .stats {
+            display: flex;
+            gap: 20px;
+            justify-content: space-between;
+            margin-bottom: 40px;
+        }
+        .stat-card {
+            flex: 1;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 3px 7px rgba(0,0,0,0.1);
+            padding: 25px 20px;
+            text-align: center;
+        }
+        .stat-card h2 {
+            font-size: 2rem;
+            margin: 0 0 10px 0;
+            color: #007bff;
+        }
+        .stat-card p {
+            margin: 0;
+            font-size: 1rem;
+            color: #666;
+        }
+        @media(max-width: 600px) {
+            .stats {
+                flex-direction: column;
+                gap: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Welcome to the Admin Dashboard</h1>
+    </header>
+    <main>
+        <p>This is a simple custom admin dashboard.</p>
+
+        <div class="stats">
+            <div class="stat-card">
+                <h2>150</h2>
+                <p>New Users</p>
+            </div>
+            <div class="stat-card">
+                <h2>53</h2>
+                <p>Active Projects</p>
+            </div>
+            <div class="stat-card">
+                <h2>24</h2>
+                <p><a href="stock_page/">stock</a></p>
+            </div>
+        </div>
+
+        <a href="/admin/" class="button">Go to Django Admin</a>
+    </main>
+</body>
+</html>

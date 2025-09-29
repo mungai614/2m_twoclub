@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Stock Management</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+
+    th, td {
+      border: 1px solid #ccc;
+      padding: 8px;
+      text-align: left;
+    }
+
+    th {
+      background-color: #f4f4f4;
+    }
+
+    input[type="number"] {
+      width: 60px;
+    }
+
+    button {
+      padding: 5px 10px;
+      cursor: pointer;
+    }
+
+    .danger {
+      background-color: #e74c3c;
+      color: white;
+      border: none;
+    }
+
+    .update {
+      background-color: #3498db;
+      color: white;
+      border: none;
+    }
+
+    #add-form {
+      margin-top: 30px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Stock Management</h1>
+
+  <table id="stockTable">
+    <thead>
+      <tr>
+        <th>Item</th>
+        <th>Quantity</th>
+        <th>Update</th>
+        <th>Remove</th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- Stock items will go here -->
+    </tbody>
+  </table>
+
+  <form id="add-form">
+    <h2>Add New Stock Item</h2>
+    <input type="text" id="newItem" placeholder="Item name" required />
+    <input type="number" id="newQuantity" placeholder="Quantity" required />
+    <button type="submit">Add Item</button>
+  </form>
+
+  <script>
+  const apiBase = '';
+
+  async function fetchStock() {
+    const res = await fetch(`${apiBase}/stock/`);
+    const data = await res.json();
+    return data.items;
+  }
+
+  async function renderTable() {
+    const stock = await fetchStock();
+    const tableBody = document.querySelector('#stockTable tbody');
+    tableBody.innerHTML = '';
+
+    stock.forEach(item => {
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td>${item.name}</td>
+        <td><input type="number" value="${item.quantity}" id="qty-${item.id}" /></td>
+        <td><button class="update" onclick="updateQuantity(${item.id})">Update</button></td>
+        <td><button class="danger" onclick="removeItem(${item.id}, '${item.name}')">Remove</button></td>
+      `;
+      tableBody.appendChild(row);
+    });
+  }
+
+  async function updateQuantity(itemId) {
+    const input = document.getElementById(`qty-${itemId}`);
+    const newQty = parseInt(input.value, 10);
+    if (!isNaN(newQty) && newQty >= 0) {
+      await fetch(`${apiBase}/update/${itemId}/`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ quantity: newQty })
+      });
+      renderTable();
+    } else {
+      alert('Invalid quantity.');
+    }
+  }
+
+  async function removeItem(itemId, name) {
+    if (confirm(`Remove "${name}" from stock?`)) {
+      await fetch(`${apiBase}/delete/${itemId}/`, { method: 'POST' });
+      renderTable();
+    }
+  }
+
+  document.getElementById('add-form').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const name = document.getElementById('newItem').value.trim();
+    const quantity = parseInt(document.getElementById('newQuantity').value, 10);
+
+    if (name && !isNaN(quantity)) {
+      await fetch(`${apiBase}/add/`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, quantity })
+      });
+      this.reset();
+      renderTable();
+    } else {
+      alert('Please enter valid item name and quantity.');
+    }
+  });
+
+  renderTable();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Worker Directory</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 30px;
+      background: #f9f9f9;
+    }
+    h1 {
+      text-align: center;
+    }
+    form {
+      max-width: 400px;
+      margin: 0 auto 30px;
+      padding: 20px;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 0 8px rgba(0,0,0,0.1);
+    }
+    form input, form button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 10px;
+      font-size: 1rem;
+    }
+    #worker-list {
+      max-width: 700px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(auto-fill,minmax(200px,1fr));
+      gap: 20px;
+    }
+    .worker-card {
+      background: white;
+      padding: 15px;
+      border-radius: 8px;
+      box-shadow: 0 0 6px rgba(0,0,0,0.1);
+      text-align: center;
+      position: relative;
+    }
+    .worker-card img {
+      max-width: 100%;
+      height: 150px;
+      object-fit: cover;
+      border-radius: 6px;
+    }
+    .worker-name {
+      font-weight: bold;
+      margin-top: 10px;
+      font-size: 1.1rem;
+    }
+    .worker-role {
+      color: #555;
+      margin-top: 5px;
+      font-style: italic;
+    }
+    .delete-btn {
+      margin-top: 10px;
+      padding: 8px 12px;
+      background: #e74c3c;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .delete-btn:hover {
+      background: #c0392b;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Add Worker</h1>
+  <form id="worker-form">
+    <input type="text" id="name" placeholder="Worker Name" required />
+    <input type="text" id="role" placeholder="Worker Role / Credentials" required />
+    <input type="file" id="photo" accept="image/*" required />
+    <button type="submit">Add Worker</button>
+  </form>
+
+  <div id="worker-list"></div>
+
+  <script>
+    const form = document.getElementById('worker-form');
+    const workerList = document.getElementById('worker-list');
+
+    form.addEventListener('submit', function(e) {
+      e.preventDefault();
+
+      const name = document.getElementById('name').value.trim();
+      const role = document.getElementById('role').value.trim();
+      const photoInput = document.getElementById('photo');
+
+      if (!name || !role || !photoInput.files.length) {
+        alert('Please fill out all fields and upload a photo.');
+        return;
+      }
+
+      const file = photoInput.files[0];
+      const reader = new FileReader();
+
+      reader.onload = function(event) {
+        const imgSrc = event.target.result;
+
+        const card = document.createElement('div');
+        card.classList.add('worker-card');
+        card.innerHTML = `
+          <img src="${imgSrc}" alt="${name}" />
+          <div class="worker-name">${name}</div>
+          <div class="worker-role">${role}</div>
+          <button class="delete-btn">Delete</button>
+        `;
+
+        const deleteBtn = card.querySelector('.delete-btn');
+        deleteBtn.addEventListener('click', function() {
+          if (confirm(`Are you sure you want to delete ${name}?`)) {
+            card.remove();
+          }
+        });
+
+        workerList.appendChild(card);
+        form.reset();
+      };
+
+      reader.readAsDataURL(file);
+    });
+  </script>
+
+</body>
+</html>
