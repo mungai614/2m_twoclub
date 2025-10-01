@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Workers</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+        .worker {
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+        .worker img {
+            max-width: 100px;
+            max-height: 100px;
+            margin-right: 20px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+        .worker-info {
+            flex-grow: 1;
+        }
+        .worker-info h2 {
+            margin: 0 0 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Workers</h1>
+    {% if workers %}
+        {% for worker in workers %}
+            <div class="worker">
+                <img src="{{ worker.photo.url }}" alt="{{ worker.name }} photo" />
+                <div class="worker-info">
+                    <h2>{{ worker.name }}</h2>
+                    <p><strong>Role:</strong> {{ worker.role }}</p>
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <p>No workers found.</p>
+    {% endif %}
+</body>
+</html>

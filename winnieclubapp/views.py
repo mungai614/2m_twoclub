@@ -1,35 +1,53 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth import login
-from .forms import UserRegisterForm
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.forms import UserCreationForm
+from django.contrib import messages
 
-from .models import StockItem
-from .models import Member
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from rest_framework import status
+
+from django.db.models import Sum, F, FloatField, ExpressionWrapper
+
+from .models import StockItem, Sale, Worker
+from .forms import SaleForm, WorkerForm
+from .serializers import StockItemSerializer
+
+
+# --- Basic Pages ---
 
 def home(request):
     return render(request, 'home.html')
 
-from django.contrib import messages
-from django.contrib.auth.forms import UserCreationForm
-from django.contrib.auth.models import User
+
+def dashboard(request):
+    return render(request, 'dashboard.html')
+
+
+@login_required
+def profile_view(request):
+    return render(request, 'profile.html')
+
 
 def register(request):
+    """
+    User registration view with email capture and redirect based on admin status.
+    """
     if request.method == 'POST':
         form = UserCreationForm(request.POST)
         if form.is_valid():
             user = form.save(commit=False)
-
-            # Save email manually if UserCreationForm doesn't collect it
-            user.email = request.POST.get('email')  # assuming you add email field in the template
+            user.email = request.POST.get('email')  # make sure your registration form has an email field
             user.save()
 
             login(request, user)
 
-            # Check if it's an admin email
-            admin_emails = ['admin@example.com', 'superuser@example.com']  # customize this
+            admin_emails = ['admin@example.com', 'superuser@example.com']  # customize this list
             if user.email in admin_emails:
-                return redirect('dashboard')  # admin dashboard URL name
+                return redirect('dashboard')
             else:
-                return redirect('home')  # regular user home URL name
+                return redirect('home')
         else:
             messages.error(request, "Please correct the errors below.")
     else:
@@ -37,94 +55,115 @@ def register(request):
 
     return render(request, 'register.html', {'form': form})
 
-# views.py
-from django.contrib.auth.decorators import login_required
-from django.shortcuts import render
 
-@login_required
-def profile_view(request):
-    return render(request, 'profile.html')
+# --- Stock Item API Views ---
 
-
-
-
-from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
-from .models import StockItem
-import json
-
-def stock_page(request):
-    return render(request, 'stock_page.html')
-
+@api_view(['GET'])
 def stock_list(request):
-    if request.method == 'GET':
-        items = list(StockItem.objects.values())
-        return JsonResponse({'items': items})
+    items = StockItem.objects.all()
+    serializer = StockItemSerializer(items, many=True)
+    return Response({'items': serializer.data})
 
-@csrf_exempt
+
+@api_view(['POST'])
 def add_item(request):
-    if request.method == 'POST':
-        try:
-            data = json.loads(request.body)
-            name = data.get('name')
-            quantity = data.get('quantity', 0)
+    serializer = StockItemSerializer(data=request.data)
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-            if not name or not isinstance(quantity, int) or quantity < 0:
-                return JsonResponse({'status': 'error', 'message': 'Invalid input'}, status=400)
 
-            item = StockItem.objects.create(name=name, quantity=quantity)
-            return JsonResponse({'id': item.id, 'name': item.name, 'quantity': item.quantity})
-
-        except json.JSONDecodeError:
-            return JsonResponse({'status': 'error', 'message': 'Invalid JSON'}, status=400)
-
-    return JsonResponse({'status': 'error', 'message': 'Method not allowed'}, status=405)
-
-@csrf_exempt
+@api_view(['POST'])
 def update_item(request, item_id):
-    if request.method == 'POST':
-        data = json.loads(request.body)
-        quantity = data.get('quantity')
-        try:
-            item = StockItem.objects.get(id=item_id)
-            item.quantity = quantity
-            item.save()
-            return JsonResponse({'status': 'success'})
-        except StockItem.DoesNotExist:
-            return JsonResponse({'status': 'error', 'message': 'Item not found'}, status=404)
+    try:
+        item = StockItem.objects.get(id=item_id)
+        item.quantity = request.data.get('quantity', item.quantity)
+        item.save()
+        return Response({'status': 'updated'})
+    except StockItem.DoesNotExist:
+        return Response({'error': 'Item not found'}, status=404)
 
-@csrf_exempt
+
+@api_view(['POST'])
 def delete_item(request, item_id):
-    if request.method == 'POST':
-        try:
-            item = StockItem.objects.get(id=item_id)
-            item.delete()
-            return JsonResponse({'status': 'deleted'})
-        except StockItem.DoesNotExist:
-            return JsonResponse({'status': 'error', 'message': 'Item not found'}, status=404)
+    try:
+        item = StockItem.objects.get(id=item_id)
+        item.delete()
+        return Response({'status': 'deleted'})
+    except StockItem.DoesNotExist:
+        return Response({'error': 'Item not found'}, status=404)
 
 
-
-from .models import Worker
-from .forms import WorkerForm
+# --- Worker Views ---
 
 def worker_list_create(request):
     if request.method == 'POST':
         form = WorkerForm(request.POST, request.FILES)
         if form.is_valid():
             form.save()
-            return redirect('worker-list-create.')
+            return redirect('worker-list-create')  # Make sure this URL name is correct
     else:
         form = WorkerForm()
 
     workers = Worker.objects.all()
-    return render(request, 'worker_list_create.html', {
-        'form': form,
-        'workers': workers
-    })
+    return render(request, 'worker_list_create.html', {'form': form, 'workers': workers})
 
 
+def worker_list(request):
+    workers = Worker.objects.all()
+    return render(request, 'worker_list.html', {'workers': workers})
 
-def dashboard(request):
-    return render(request, 'dashboard.html')
 
+# --- Money Management ---
+
+def money_management(request):
+    total_spent = StockItem.objects.aggregate(
+        total=Sum(ExpressionWrapper(F('buying_price') * F('quantity'), output_field=FloatField()))
+    )['total'] or 0
+
+    total_revenue = Sale.objects.aggregate(
+        total=Sum(ExpressionWrapper(F('quantity_sold') * F('selling_price'), output_field=FloatField()))
+    )['total'] or 0
+
+    total_cost_sold = Sale.objects.aggregate(
+        total=Sum(ExpressionWrapper(F('quantity_sold') * F('buying_price'), output_field=FloatField()))
+    )['total'] or 0
+
+    total_profit = total_revenue - total_cost_sold
+
+    context = {
+        'total_spent': total_spent,
+        'total_revenue': total_revenue,
+        'total_profit': total_profit,
+    }
+    return render(request, 'money_management.html', context)
+
+
+# --- Sale Views ---
+
+from django.shortcuts import render, redirect
+from .forms import SaleForm
+
+def record_sale(request):
+    if request.method == 'POST':
+        form = SaleForm(request.POST)
+        if form.is_valid():
+            sale = form.save()  # saves Sale and sets FK correctly
+            return redirect('sales_list')  # redirect to your sales list page
+    else:
+        form = SaleForm()
+
+    return render(request, 'record_sale.html', {'form': form})
+
+
+def sales_list(request):
+    sales = Sale.objects.all().order_by('-date_sold')
+    context = {'sales': sales}
+    return render(request, 'sales_list.html', context)
+
+
+# --- Other Pages ---
+
+def stock_page(request):
+    return render(request, 'stock_page.html')

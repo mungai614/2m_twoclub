@@ -15,3 +15,24 @@ class WorkerForm(forms.ModelForm):
     class Meta:
         model = Worker
         fields = ['name', 'role', 'photo']
+
+
+
+from django import forms
+from .models import Sale, StockItem
+
+from django import forms
+from .models import Sale, StockItem
+
+from django import forms
+from .models import StockItem
+
+from django import forms
+from .models import Sale, StockItem
+
+class SaleForm(forms.ModelForm):
+    stock_item = forms.ModelChoiceField(queryset=StockItem.objects.all())
+
+    class Meta:
+        model = Sale
+        fields = '__all__'

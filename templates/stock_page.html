@@ -77,7 +77,8 @@
   </form>
 
   <script>
-  const apiBase = '';
+  const apiBase = 'http://localhost:8000'; // or your deployed backend
+
 
   async function fetchStock() {
     const res = await fetch(`${apiBase}/stock/`);

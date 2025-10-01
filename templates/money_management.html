@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Money Management</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #4CAF50;
+      --light-bg: #f9f9f9;
+      --text: #333;
+      --card-bg: #ffffff;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Roboto', sans-serif;
+      background-color: var(--light-bg);
+      color: var(--text);
+      padding: 40px 20px;
+    }
+
+    .summary {
+      max-width: 600px;
+      margin: auto;
+      background-color: var(--card-bg);
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .summary h1 {
+      text-align: center;
+      color: var(--primary);
+      margin-bottom: 30px;
+      font-size: 2em;
+    }
+
+    .summary div {
+      background: #f1f1f1;
+      margin: 15px 0;
+      padding: 20px;
+      border-radius: 8px;
+      font-size: 1.15em;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+
+    .summary div strong {
+      color: #555;
+      display: block;
+      margin-bottom: 8px;
+    }
+
+    @media (max-width: 600px) {
+      .summary {
+        padding: 20px;
+      }
+
+      .summary h1 {
+        font-size: 1.6em;
+      }
+
+      .summary div {
+        font-size: 1em;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="summary">
+    <h1>Money Management Summary</h1>
+    <div>
+      <strong>Total Money Spent on Stock (Buying Price):</strong>
+      ${{ total_spent|floatformat:2 }}
+    </div>
+    <div>
+      <strong>Total Revenue from Sales (Selling Price):</strong>
+      ${{ total_revenue|floatformat:2 }}
+    </div>
+    <div>
+      <strong>Total Profit (Interest Made):</strong>
+      ${{ total_profit|floatformat:2 }}
+    </div>
+  </div>
+</body>
+</html>

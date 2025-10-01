@@ -48,9 +48,11 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'winnieclubapp',
     'dashboard',
+    'corsheaders',
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',

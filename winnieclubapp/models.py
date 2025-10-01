@@ -1,6 +1,8 @@
 from django.db import models
 from django.contrib.auth.models import User
-
+from datetime import datetime
+from datetime import date
+import datetime
 
 
 class Member(models.Model):
@@ -23,10 +25,12 @@ class Event(models.Model):
     def __str__(self):
         return self.title
 
-
 class StockItem(models.Model):
-    name = models.CharField(max_length=100)
-    quantity = models.PositiveIntegerField(default=0)
+    name = models.CharField(max_length=200)
+    quantity = models.PositiveIntegerField()
+
+    buying_price = models.DecimalField(max_digits=10, decimal_places=2, default=0)  # Cost per unit
+    selling_price = models.DecimalField(max_digits=10, decimal_places=2, default=0)  # Sale price per unit
 
     def __str__(self):
         return self.name
@@ -39,3 +43,22 @@ class Worker(models.Model):
 
     def __str__(self):
         return self.name
+
+
+from datetime import date
+from django.db import models
+
+class Sale(models.Model):
+    stock_item = models.ForeignKey(StockItem, on_delete=models.CASCADE)
+    buying_price = models.DecimalField(max_digits=10, decimal_places=2)
+    selling_price = models.DecimalField(max_digits=10, decimal_places=2)
+    date_sold = models.DateField(default=date.today)
+    quantity_sold = models.PositiveIntegerField()
+
+    @property
+    def profit(self):
+        return self.selling_price - self.buying_price
+
+    def __str__(self):
+        return f"Sale of {self.stock_item.name} on {self.date_sold}"
+
