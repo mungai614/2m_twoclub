@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Admin Dashboard</title>
     <style>
-        /* Reset some default styles */
         * {
             box-sizing: border-box;
         }
@@ -24,7 +23,7 @@
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
         main {
-            max-width: 900px;
+            max-width: 1000px;
             margin: 40px auto;
             padding: 0 20px;
         }
@@ -34,11 +33,45 @@
             font-size: 2.5rem;
         }
         p {
-            font-size: 1.2rem;
-            margin: 15px 0 30px 0;
+            font-size: 1.1rem;
             line-height: 1.5;
+            margin-bottom: 20px;
         }
-        a.button {
+
+        .section-title {
+            font-size: 1.5rem;
+            margin: 40px 0 20px 0;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 5px;
+        }
+
+        /* Dashboard links */
+        .dashboard-links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        .dashboard-card {
+            flex: 1 1 250px;
+            background: white;
+            padding: 25px 20px;
+            border-radius: 10px;
+            box-shadow: 0 3px 7px rgba(0,0,0,0.1);
+            text-align: center;
+            transition: transform 0.2s ease;
+        }
+        .dashboard-card:hover {
+            transform: translateY(-5px);
+        }
+        .dashboard-card a {
+            text-decoration: none;
+            color: #007bff;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        /* Call to action button */
+        .button {
             display: inline-block;
             background-color: #28a745;
             color: white;
@@ -47,39 +80,15 @@
             border-radius: 6px;
             font-weight: 600;
             transition: background-color 0.3s ease;
+            margin-top: 30px;
         }
-        a.button:hover {
+        .button:hover {
             background-color: #218838;
         }
-        /* Optional: add a stats section */
-        .stats {
-            display: flex;
-            gap: 20px;
-            justify-content: space-between;
-            margin-bottom: 40px;
-        }
-        .stat-card {
-            flex: 1;
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 3px 7px rgba(0,0,0,0.1);
-            padding: 25px 20px;
-            text-align: center;
-        }
-        .stat-card h2 {
-            font-size: 2rem;
-            margin: 0 0 10px 0;
-            color: #007bff;
-        }
-        .stat-card p {
-            margin: 0;
-            font-size: 1rem;
-            color: #666;
-        }
+
         @media(max-width: 600px) {
-            .stats {
+            .dashboard-links {
                 flex-direction: column;
-                gap: 15px;
             }
         }
     </style>
@@ -88,21 +97,26 @@
     <header>
         <h1>Welcome to the Admin Dashboard</h1>
     </header>
-    <main>
-        <p>This is a simple custom admin dashboard.</p>
 
-        <div class="stats">
-            <div class="stat-card">
-                <h2>150</h2>
-                <p>New Users</p>
+    <main>
+        <p>This is a custom admin dashboard for managing your club’s operations efficiently.</p>
+
+        <h2 class="section-title">Quick Access</h2>
+        <div class="dashboard-links">
+            <div class="dashboard-card">
+                <a href="{% url 'worker_list' %}">Manage Workers</a>
             </div>
-            <div class="stat-card">
-                <h2>53</h2>
-                <p>Active Projects</p>
+            <div class="dashboard-card">
+                <a href="{% url 'money_management' %}">Money Management</a>
             </div>
-            <div class="stat-card">
-                <h2>24</h2>
-                <p><a href="stock_page/">stock</a></p>
+            <div class="dashboard-card">
+                <a href="{% url 'record_sale' %}">Record Sale</a>
+            </div>
+            <div class="dashboard-card">
+                <a href="{% url 'sales_list' %}">Sales List</a>
+            </div>
+            <div class="dashboard-card">
+                <a href="{% url 'stock_page' %}">Stock Management</a>
             </div>
         </div>
 

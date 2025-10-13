@@ -1,50 +1,61 @@
 from django.shortcuts import render, redirect
-from django.contrib.auth import login
+from django.contrib.auth import login, authenticate
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.views import LoginView
 from django.contrib import messages
+
+from django.db.models import Sum, F, FloatField, ExpressionWrapper
 
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
 
-from django.db.models import Sum, F, FloatField, ExpressionWrapper
-
-from .models import StockItem, Sale, Worker
+from .models import StockItem, Sale, Worker, Event
 from .forms import SaleForm, WorkerForm
 from .serializers import StockItemSerializer
+
+
+# --- Custom Login View ---
+
+class CustomLoginView(LoginView):
+    template_name = 'login.html'
+
+    def get_success_url(self):
+        user = self.request.user
+        if user.is_staff or user.is_superuser:
+            return '/dashboard/'
+        return '/'
 
 
 # --- Basic Pages ---
 
 def home(request):
-    return render(request, 'home.html')
+    events = Event.objects.order_by('event_date')
+    return render(request, 'home.html', {'events': events})
 
-
+@login_required
 def dashboard(request):
     return render(request, 'dashboard.html')
-
 
 @login_required
 def profile_view(request):
     return render(request, 'profile.html')
 
 
+# --- Registration View ---
+
 def register(request):
-    """
-    User registration view with email capture and redirect based on admin status.
-    """
     if request.method == 'POST':
         form = UserCreationForm(request.POST)
         if form.is_valid():
             user = form.save(commit=False)
-            user.email = request.POST.get('email')  # make sure your registration form has an email field
+            user.email = request.POST.get('email')
             user.save()
-
-            login(request, user)
-
-            admin_emails = ['admin@example.com', 'superuser@example.com']  # customize this list
-            if user.email in admin_emails:
+            authenticated_user = authenticate(username=user.username, password=request.POST['password1'])
+            if authenticated_user is not None:
+                login(request, authenticated_user)
+            if user.is_staff or user.is_superuser:
                 return redirect('dashboard')
             else:
                 return redirect('home')
@@ -52,18 +63,16 @@ def register(request):
             messages.error(request, "Please correct the errors below.")
     else:
         form = UserCreationForm()
-
     return render(request, 'register.html', {'form': form})
 
 
-# --- Stock Item API Views ---
+# --- Stock API Views ---
 
 @api_view(['GET'])
 def stock_list(request):
     items = StockItem.objects.all()
     serializer = StockItemSerializer(items, many=True)
     return Response({'items': serializer.data})
-
 
 @api_view(['POST'])
 def add_item(request):
@@ -72,7 +81,6 @@ def add_item(request):
         serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
 
 @api_view(['POST'])
 def update_item(request, item_id):
@@ -83,7 +91,6 @@ def update_item(request, item_id):
         return Response({'status': 'updated'})
     except StockItem.DoesNotExist:
         return Response({'error': 'Item not found'}, status=404)
-
 
 @api_view(['POST'])
 def delete_item(request, item_id):
@@ -102,13 +109,11 @@ def worker_list_create(request):
         form = WorkerForm(request.POST, request.FILES)
         if form.is_valid():
             form.save()
-            return redirect('worker-list-create')  # Make sure this URL name is correct
+            return redirect('workers_list_create')
     else:
         form = WorkerForm()
-
     workers = Worker.objects.all()
     return render(request, 'worker_list_create.html', {'form': form, 'workers': workers})
-
 
 def worker_list(request):
     workers = Worker.objects.all()
@@ -142,28 +147,22 @@ def money_management(request):
 
 # --- Sale Views ---
 
-from django.shortcuts import render, redirect
-from .forms import SaleForm
-
 def record_sale(request):
     if request.method == 'POST':
         form = SaleForm(request.POST)
         if form.is_valid():
-            sale = form.save()  # saves Sale and sets FK correctly
-            return redirect('sales_list')  # redirect to your sales list page
+            form.save()
+            return redirect('sales_list')
     else:
         form = SaleForm()
-
     return render(request, 'record_sale.html', {'form': form})
-
 
 def sales_list(request):
     sales = Sale.objects.all().order_by('-date_sold')
-    context = {'sales': sales}
-    return render(request, 'sales_list.html', context)
+    return render(request, 'sales_list.html', {'sales': sales})
 
 
-# --- Other Pages ---
+# --- Stock Page View ---
 
 def stock_page(request):
     return render(request, 'stock_page.html')

@@ -1,19 +1,15 @@
 from django.db import models
 from django.contrib.auth.models import User
-from datetime import datetime
 from datetime import date
-import datetime
-
 
 class Member(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)  # Link to Django's built-in User
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
     phone = models.CharField(max_length=15, blank=True)
     joined_date = models.DateField(auto_now_add=True)
     bio = models.TextField(blank=True)
 
     def __str__(self):
         return self.user.username
-
 
 class Event(models.Model):
     title = models.CharField(max_length=100)
@@ -28,13 +24,11 @@ class Event(models.Model):
 class StockItem(models.Model):
     name = models.CharField(max_length=200)
     quantity = models.PositiveIntegerField()
-
-    buying_price = models.DecimalField(max_digits=10, decimal_places=2, default=0)  # Cost per unit
-    selling_price = models.DecimalField(max_digits=10, decimal_places=2, default=0)  # Sale price per unit
+    buying_price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    selling_price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
 
     def __str__(self):
         return self.name
-
 
 class Worker(models.Model):
     name = models.CharField(max_length=100)
@@ -43,10 +37,6 @@ class Worker(models.Model):
 
     def __str__(self):
         return self.name
-
-
-from datetime import date
-from django.db import models
 
 class Sale(models.Model):
     stock_item = models.ForeignKey(StockItem, on_delete=models.CASCADE)
@@ -57,8 +47,7 @@ class Sale(models.Model):
 
     @property
     def profit(self):
-        return self.selling_price - self.buying_price
+        return (self.selling_price - self.buying_price) * self.quantity_sold
 
     def __str__(self):
         return f"Sale of {self.stock_item.name} on {self.date_sold}"
-

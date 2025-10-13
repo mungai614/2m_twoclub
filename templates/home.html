@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Club Management</title>
+    <title>ClubConnect</title>
     <style>
         /* Reset default margin and padding */
         * {
@@ -13,75 +13,287 @@
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f5f9f7;
-            color: #333;
+            font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f4f8;
+            color: #222;
         }
 
         nav {
-            background-color: #4caf50; /* a fresh green */
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            background: linear-gradient(to right, #4b2f8b, #6a47b9);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+            padding: 0 20px;
         }
 
         ul {
-            list-style-type: none;
+            list-style: none;
             display: flex;
-            justify-content: flex-end;
+            justify-content: space-between;
             align-items: center;
-            padding: 0 20px;
-            height: 60px;
+            height: 70px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 700;
+            color: #fff;
+            letter-spacing: 1px;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
         }
 
         li {
-            margin-left: 20px;
+            margin-left: 25px;
         }
 
         li a {
-            color: white;
+            color: #fff;
             text-decoration: none;
             font-weight: 600;
             padding: 10px 18px;
-            border-radius: 4px;
-            transition: background-color 0.3s ease;
+            border-radius: 6px;
+            transition: background-color 0.3s ease, transform 0.2s ease;
         }
 
         li a:hover {
-            background-color: #357a38;
+            background-color: #7a5fd6;
+            transform: translateY(-2px);
         }
 
-        /* Style for the user greeting and auth links */
-        li p {
-            color: white;
+        .auth-info p {
+            color: #f1f1f1;
             font-weight: 500;
         }
 
-        li p a {
-            color: #d4f4d4;
-            text-decoration: underline;
-            margin-left: 5px;
+        .auth-info p a {
+            color: #ffd86b;
+            text-decoration: none;
+            margin-left: 8px;
             font-weight: 600;
         }
 
-        li p a:hover {
-            color: #a0d68f;
+        .auth-info p a:hover {
+            color: #ffb700;
+        }
+
+        /* Hero Section */
+        .hero {
+            background: linear-gradient(to right, #6a47b9, #4b2f8b);
+            color: #fff;
+            padding: 100px 20px;
+            text-align: center;
+        }
+
+        .hero h1 {
+            font-size: 48px;
+            margin-bottom: 20px;
+        }
+
+        .hero p {
+            font-size: 18px;
+            margin-bottom: 30px;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .cta-button {
+            background-color: #ffd86b;
+            color: #222;
+            padding: 12px 24px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none;
+            transition: background-color 0.3s ease;
+        }
+
+        .cta-button:hover {
+            background-color: #ffb700;
+        }
+
+        /* About Section */
+        .about {
+            background-color: #fff;
+            padding: 60px 20px;
+            text-align: center;
+        }
+
+        .about h2 {
+            font-size: 32px;
+            margin-bottom: 20px;
+            color: #4b2f8b;
+        }
+
+        .about p {
+            font-size: 18px;
+            max-width: 800px;
+            margin: 0 auto;
+            color: #555;
+        }
+
+        /* Events Section */
+        .events {
+            background-color: #f9f9f9;
+            padding: 60px 20px;
+            text-align: center;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .events h2 {
+            font-size: 32px;
+            margin-bottom: 30px; /* Added more space */
+            color: #4b2f8b;
+        }
+
+        .event-list {
+            list-style: none;
+            padding: 0;
+            font-size: 18px;
+            color: #444;
+            margin-bottom: 20px;
+        }
+
+        .event-list li {
+            margin-bottom: 30px;
+            display: flex;
+            flex-direction: column; /* Stack content vertically */
+            align-items: flex-start; /* Align text left */
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+            padding: 15px 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 6px rgba(75, 47, 139, 0.15);
+        }
+
+        .event-list li h3 {
+            margin-bottom: 8px;
+            color: #4b2f8b;
+        }
+
+        .event-list li p {
+            margin: 6px 0;
+        }
+
+        .event-list li .event-description {
+            color: #555;
+            margin-top: 12px;
+        }
+
+        .event-list li .event-organizer {
+            font-size: 14px;
+            color: #888;
+            margin-top: 10px;
+        }
+
+        /* Footer */
+        footer {
+            background-color: #4b2f8b;
+            color: #fff;
+            text-align: center;
+            padding: 20px;
+            margin-top: 60px;
+        }
+
+        /* Responsive Nav */
+        @media (max-width: 768px) {
+            ul {
+                flex-direction: column;
+                align-items: flex-start;
+                padding: 20px;
+            }
+
+            .nav-links {
+                flex-direction: column;
+                width: 100%;
+            }
+
+            li {
+                margin: 10px 0;
+            }
+
+            .hero h1 {
+                font-size: 36px;
+            }
+
+            .hero p {
+                font-size: 16px;
+            }
         }
     </style>
 </head>
 <body>
+
+<!-- Navigation -->
 <nav>
     <ul>
-        <li><a href="home/">Home</a></li>
-        <li><a href="profile/">Profile</a></li>
-        <li><a href="stock_page/">Stock</a></li>
+        <li class="logo">ClubConnect</li>
+        <div class="nav-links">
+            <li><a href="profile/">Profile</a></li>
 
-        <li>
-            {% if user.is_authenticated %}
-                <p>Hello, {{ user.username }} | <a href="{% url 'logout' %}">Logout</a></p>
-            {% else %}
-                <p><a href="{% url 'login' %}">Login</a> | <a href="{% url 'register' %}">Register</a></p>
-            {% endif %}
-        </li>
+            <li class="auth-info">
+                {% if user.is_authenticated %}
+                    <p>Hello, {{ user.username }} | <a href="{% url 'logout' %}">Logout</a></p>
+                {% else %}
+                    <p><a href="{% url 'login' %}">Login</a> | <a href="{% url 'register' %}">Register</a></p>
+                {% endif %}
+            </li>
+        </div>
     </ul>
 </nav>
+
+<!-- Hero Section -->
+<section class="hero">
+    <div class="hero-content">
+        <h1>Welcome to ClubConnect</h1>
+        <p>Bringing clubs and communities together. Manage your members, events, and inventory all in one place.</p>
+        <a href="register/" class="cta-button">Join Now</a>
+    </div>
+</section>
+
+<!-- About Section -->
+<section class="about">
+    <div class="container">
+        <h2>About ClubConnect</h2>
+        <p>ClubConnect is a modern platform designed to help student organizations and clubs manage their resources, events, and members efficiently. Whether you're organizing a local event or managing club inventory, we’ve got you covered.</p>
+    </div>
+</section>
+
+<!-- Events Section -->
+<section class="events">
+    <h2>Upcoming Events</h2>
+    <ul id="event-list" class="event-list">
+        {% for event in events %}
+            <li>
+                <h3>{{ event.title }}</h3>
+                <p><strong>Date & Time:</strong> {{ event.event_date|date:"F d, Y, h:i A" }}</p>
+                <p><strong>Location:</strong> {{ event.location }}</p>
+                <p class="event-description">{{ event.description }}</p>
+                <p class="event-organizer">
+                    Organized by:
+                    {% if event.created_by %}
+                        {{ event.created_by.user.username }}
+                    {% else %}
+                        Unknown
+                    {% endif %}
+                </p>
+            </li>
+        {% empty %}
+            <li>No upcoming events.</li>
+        {% endfor %}
+    </ul>
+</section>
+
+<!-- Footer -->
+<footer>
+    <p>&copy; 2025 ClubConnect. All rights reserved.</p>
+</footer>
+
 </body>
 </html>
