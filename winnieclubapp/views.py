@@ -34,9 +34,15 @@ def home(request):
     events = Event.objects.order_by('event_date')
     return render(request, 'home.html', {'events': events})
 
+from django.db.models import F
+from .models import StockItem
+
 @login_required
 def dashboard(request):
-    return render(request, 'dashboard.html')
+    low_stock_items = StockItem.objects.filter(quantity__lte=F('min_stock_level'))
+    return render(request, 'dashboard.html', {
+        'low_stock_items': low_stock_items
+    })
 
 @login_required
 def profile_view(request):
@@ -151,7 +157,23 @@ def record_sale(request):
     if request.method == 'POST':
         form = SaleForm(request.POST)
         if form.is_valid():
-            form.save()
+            sale = form.save(commit=False)
+            stock_item = sale.stock_item
+
+            # Get prices from stock item
+            sale.buying_price = stock_item.buying_price
+            sale.selling_price = stock_item.selling_price
+
+            # Validate quantity (already done in form clean, but double-check)
+            if sale.quantity_sold > stock_item.quantity:
+                form.add_error('quantity_sold', f"Not enough stock. Available quantity: {stock_item.quantity}")
+                return render(request, 'record_sale.html', {'form': form})
+
+            # Deduct sold quantity from stock
+            stock_item.quantity -= sale.quantity_sold
+            stock_item.save()
+
+            sale.save()
             return redirect('sales_list')
     else:
         form = SaleForm()
@@ -166,3 +188,85 @@ def sales_list(request):
 
 def stock_page(request):
     return render(request, 'stock_page.html')
+
+
+
+
+import logging
+from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
+from django.db.models.functions import ExtractYear, ExtractMonth, ExtractDay
+from django.db.models import Sum, F, FloatField, ExpressionWrapper
+from collections import OrderedDict
+import calendar
+
+logger = logging.getLogger(__name__)
+
+@login_required
+def sales_chart(request):
+    sales_data = (
+        Sale.objects
+        .annotate(
+            year=ExtractYear('date_sold'),
+            month=ExtractMonth('date_sold'),
+            day=ExtractDay('date_sold')
+        )
+        .values('year', 'month', 'day')
+        .annotate(
+            daily_total=Sum(
+                ExpressionWrapper(F('selling_price') * F('quantity_sold'), output_field=FloatField())
+            )
+        )
+        .order_by('year', 'month', 'day')
+    )
+
+    monthly_sales = OrderedDict()
+    months_found = set()
+
+    for record in sales_data:
+        year = record['year']
+        month = record['month']
+        day = record['day']
+        total = record['daily_total'] or 0
+
+        month_name = calendar.month_name[month]
+        month_label = f"{month_name} {year}"
+        months_found.add(month_label)
+
+        if month_label not in monthly_sales:
+            days_in_month = calendar.monthrange(year, month)[1]
+            monthly_sales[month_label] = [0] * days_in_month
+
+        monthly_sales[month_label][day - 1] = total
+
+    logger.info(f"Months found in sales data: {months_found}")
+
+    max_days = max(len(days) for days in monthly_sales.values()) if monthly_sales else 31
+    labels = list(range(1, max_days + 1))
+
+    data = dict(monthly_sales)
+
+    return JsonResponse({
+        'labels': labels,
+        'data': data
+    })
+
+@login_required
+def sales_chart_page(request):
+    return render(request, 'sales_chart_page.html')  # This template contains your <canvas> and JS
+
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+
+@api_view(['GET'])
+@login_required
+def get_stockitem_info(request, item_id):
+    try:
+        item = StockItem.objects.get(id=item_id)
+        return Response({
+            'buying_price': float(item.buying_price),
+            'selling_price': float(item.selling_price),
+            'quantity': item.quantity,
+        })
+    except StockItem.DoesNotExist:
+        return Response({'error': 'Item not found'}, status=404)

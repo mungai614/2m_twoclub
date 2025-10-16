@@ -69,6 +69,19 @@
       background-color: #45a049;
     }
 
+    /* New style for available quantity display */
+    #available-quantity {
+      font-weight: 700;
+      color: #2c3e50;
+      margin-top: 5px;
+      display: inline-block;
+      min-width: 30px;
+    }
+
+    label[for="id_quantity_sold"] {
+      margin-top: 20px;
+    }
+
     @media (max-width: 600px) {
       .container {
         padding: 20px;
@@ -85,9 +98,53 @@
     <h1>Record Sale</h1>
     <form method="post">
       {% csrf_token %}
-      {{ form.as_p }}
+      {{ form.stock_item.label_tag }}
+      {{ form.stock_item }}
+      <p>Available Quantity: <span id="available-quantity">-</span></p>
+
+      {{ form.quantity_sold.label_tag }}
+      {{ form.quantity_sold }}
+
+      {{ form.date_sold.label_tag }}
+      {{ form.date_sold }}
+
       <button type="submit">Submit Sale</button>
     </form>
   </div>
+
+  <script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const stockSelect = document.querySelector('select[name="stock_item"]');
+    const availQtySpan = document.getElementById('available-quantity');
+
+    function fetchStockInfo(itemId) {
+      if (!itemId) {
+        availQtySpan.textContent = '-';
+        return;
+      }
+      fetch(`/api/stockitem/${itemId}/`)
+        .then(response => response.json())
+        .then(data => {
+          if (data.error) {
+            availQtySpan.textContent = 'Error fetching data';
+          } else {
+            availQtySpan.textContent = data.quantity;
+          }
+        })
+        .catch(() => {
+          availQtySpan.textContent = 'Error fetching data';
+        });
+    }
+
+    stockSelect.addEventListener('change', function() {
+      fetchStockInfo(this.value);
+    });
+
+    // Fetch initial value if any
+    if (stockSelect.value) {
+      fetchStockInfo(stockSelect.value);
+    }
+  });
+  </script>
 </body>
 </html>

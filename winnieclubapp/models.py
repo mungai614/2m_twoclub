@@ -26,6 +26,7 @@ class StockItem(models.Model):
     quantity = models.PositiveIntegerField()
     buying_price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     selling_price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    min_stock_level = models.PositiveIntegerField(default=5)
 
     def __str__(self):
         return self.name

@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Daily Sales Comparison by Month</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        margin: 40px;
+        background: #f9f9f9;
+        color: #333;
+    }
+    h2 {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+    #salesChart {
+        max-width: 900px;
+        margin: auto;
+        background: #fff;
+        padding: 20px;
+        box-shadow: 0 0 12px rgba(0,0,0,0.1);
+        border-radius: 8px;
+    }
+</style>
+</head>
+<body>
+
+<h2>Daily Sales Comparison by Month</h2>
+<canvas id="salesChart" width="800" height="400"></canvas>
+
+<script>
+function randomColor() {
+    const r = Math.floor(Math.random() * 200);
+    const g = Math.floor(Math.random() * 200);
+    const b = Math.floor(Math.random() * 200);
+    return `rgba(${r},${g},${b},1)`;
+}
+
+function getMaxDays(data) {
+    let maxDays = 0;
+    Object.values(data).forEach(arr => {
+        if (arr.length > maxDays) maxDays = arr.length;
+    });
+    return maxDays;
+}
+
+async function fetchSalesData() {
+    const response = await fetch("/sales_chart/");
+    if (!response.ok) throw new Error('Failed to fetch sales data');
+    return await response.json(); // ⬅️ No cache, always fresh
+}
+
+fetchSalesData()
+.then(data => {
+    console.log("Sales chart data:", data); // Optional for debugging
+
+    const maxDays = getMaxDays(data.data);
+    const labels = Array.from({ length: maxDays }, (_, i) => i + 1);
+
+    const datasets = Object.entries(data.data).map(([month, dailySales]) => {
+        const padded = dailySales.slice();
+        while (padded.length < maxDays) padded.push(null);
+
+        return {
+            label: month,
+            data: padded,
+            fill: false,
+            borderColor: randomColor(),
+            backgroundColor: 'transparent',
+            tension: 0.3,
+            pointRadius: 3,
+            pointHoverRadius: 6,
+        };
+    });
+
+    const ctx = document.getElementById('salesChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'line',
+        data: { labels, datasets },
+        options: {
+            responsive: true,
+            scales: {
+                x: {
+                    title: { display: true, text: 'Day of Month' },
+                    ticks: { stepSize: 1 }
+                },
+                y: {
+                    beginAtZero: true,
+                    title: { display: true, text: 'Sales Amount' }
+                }
+            },
+            plugins: {
+                legend: { position: 'top' },
+                title: { display: true, text: 'Daily Sales Trend Comparison by Month' }
+            }
+        }
+    });
+})
+.catch(error => {
+    console.error('Error loading chart:', error);
+    alert('Could not load sales data.');
+});
+</script>
+
+</body>
+</html>

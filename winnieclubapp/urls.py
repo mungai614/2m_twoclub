@@ -33,6 +33,14 @@ urlpatterns = [
     path('add/', views.add_item, name='add_item'),
     path('update/<int:item_id>/', views.update_item, name='update_item'),
     path('delete/<int:item_id>/', views.delete_item, name='delete_item'),
+    path('sales_chart_page/', views.sales_chart_page, name='sales_chart_page'),
+path('sales_chart/', views.sales_chart, name='sales_chart'),
+path('api/stockitem/<int:item_id>/', views.get_stockitem_info, name='stockitem_info'),
+
+
+
+
+
 ]
 
 if settings.DEBUG:
